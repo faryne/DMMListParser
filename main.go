@@ -94,7 +94,7 @@ func main () {
 		NoString := NoPattern.FindStringSubmatch(link)
 
 		VideoHeader := DmmVideoHeader{
-			No: NoString[1],
+			No: strings.ToUpper(NoString[1]),
 			Url: link,
 			Title: title,
 			Thumb: thumb,
