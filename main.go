@@ -163,7 +163,8 @@ func ParsePage (PageUrl string) DmmVideoBody {
 					VideoBody.Duration = strings.TrimSpace(duration[1])
 					break
 				case "directors":
-					directors := rowValue.Find("a").Map(func(i int, d *goquery.Selection) string {
+					var directors []string;
+					directors = rowValue.Find("a").Map(func(i int, d *goquery.Selection) string {
 						h, _ := d.Html()
 						return strings.TrimSpace(h)
 					})
