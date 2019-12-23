@@ -7,6 +7,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -34,7 +35,7 @@ type DmmVideoHeader struct {
 type DmmVideoBody struct {
 	VodDate			string 	`json:"vod_date"`
 	PublishDate		string 	`json:"pulish_date"`
-	Duration 		string 	`json:"duration"`
+	Duration 		int 	`json:"duration"`
 	Directors 		[]string 	`json:"directors"`
 	Series			[]string 	`json:"series"`
 	Makers 			[]string 	`json:"makers"`
@@ -160,41 +161,39 @@ func ParsePage (PageUrl string) DmmVideoBody {
 				case "duration":
 					DurationPattern, _ := regexp.Compile("([0-9]+)")
 					duration := DurationPattern.FindStringSubmatch(rowContent)
-					VideoBody.Duration = strings.TrimSpace(duration[1])
+					VideoBody.Duration, _ = strconv.Atoi(strings.TrimSpace(duration[1]))
 					break
 				case "directors":
-					var directors []string;
-					directors = rowValue.Find("a").Map(func(i int, d *goquery.Selection) string {
+					rowValue.Find("a").Each(func(i int, d *goquery.Selection) {
 						h, _ := d.Html()
-						return strings.TrimSpace(h)
+						VideoBody.Directors =  append(VideoBody.Directors, strings.TrimSpace(h))
 					})
-					VideoBody.Directors = directors
 					break
 				case "series":
-					series := rowValue.Find("a").Map(func(i int, d *goquery.Selection) string {
+					VideoBody.Series = make([]string, 0)
+					rowValue.Find("a").Each(func(i int, d *goquery.Selection) {
 						h, _ := d.Html()
-						return strings.TrimSpace(h)
+						VideoBody.Series =  append(VideoBody.Series, strings.TrimSpace(h))
 					})
-					VideoBody.Series = series
 					break
 				case "makers":
-					makers := rowValue.Find("a").Map(func(i int, d *goquery.Selection) string {
+					VideoBody.Makers = make([]string, 0)
+					rowValue.Find("a").Each(func(i int, d *goquery.Selection) {
 						h, _ := d.Html()
-						return strings.TrimSpace(h)
+						VideoBody.Makers =  append(VideoBody.Makers, strings.TrimSpace(h))
 					})
-					VideoBody.Makers = makers
 				case "labels":
-					labels := rowValue.Find("a").Map(func(i int, d *goquery.Selection) string {
+					VideoBody.Labels = make([]string, 0)
+					rowValue.Find("a").Each(func(i int, d *goquery.Selection) {
 						h, _ := d.Html()
-						return strings.TrimSpace(h)
+						VideoBody.Labels =  append(VideoBody.Labels, strings.TrimSpace(h))
 					})
-					VideoBody.Labels = labels
 				case "tags":
-					tags := rowValue.Find("a").Map(func(i int, d *goquery.Selection) string {
+					VideoBody.Tags = make([]string, 0)
+					rowValue.Find("a").Each(func(i int, d *goquery.Selection) {
 						h, _ := d.Html()
-						return strings.TrimSpace(h)
+						VideoBody.Tags = append(VideoBody.Tags, strings.TrimSpace(h))
 					})
-					VideoBody.Tags = tags
 				default:
 					fmt.Printf("----\n")
 				}
@@ -212,7 +211,7 @@ func ParsePage (PageUrl string) DmmVideoBody {
 func ParseActresses (document goquery.Document, url string) []string {
 	element := document.Find("a#a_performer")
 
-	var actresses []string
+	var actresses = make([]string, 0)
 	if element.Length() == 0 {
 		actresses = document.Find("span#performer > a").Map(func(idx int, s *goquery.Selection) string {
 			h, _ := s.Html()
