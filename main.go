@@ -83,6 +83,7 @@ func main () {
 
 	// 輸出內容定在這裡
 	videos := []DmmVideo{}
+	var ch = make(chan DmmVideoBody)
 
 	imgs.Each(func(idx int, s *goquery.Selection){
 		// 解出網址 / 縮圖網址 / 標題
@@ -101,10 +102,11 @@ func main () {
 			Thumb: thumb,
 		}
 
-		VideoBody := ParsePage(link)
+		go func () { ch <- ParsePage(link) }()
+
 		videos = append(videos, DmmVideo{
 			VideoHeader,
-			VideoBody,
+			<-ch,
 		})
 	})
 
@@ -130,10 +132,7 @@ func ParsePage (PageUrl string) DmmVideoBody {
 	Patterns["labels"], _ = regexp.Compile("レーベル")
 	Patterns["tags"], _ = regexp.Compile("ジャンル")
 
-	VideoBody := DmmVideoBody {
-
-	}
-
+	var VideoBody = DmmVideoBody{}
 	// 解出詳細資訊
 	req1, _ := http.Get(PageUrl)
 	defer req1.Body.Close()
