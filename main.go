@@ -87,7 +87,7 @@ func main () {
 		// 解出網址 / 縮圖網址 / 標題
 		link, _ := s.Attr("href")
 		thumb, _ := s.Find("span > img").Attr("src")
-		title, _ := s.Attr("alt")
+		title, _ := s.Find("span > img").Attr("alt")
 
 		// 解出番號
 		NoPattern, _ := regexp.Compile("cid=([^/]+)")
