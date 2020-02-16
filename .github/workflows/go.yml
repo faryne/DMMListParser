@@ -1,7 +1,10 @@
 name: Go
-on: [push]
-jobs:
+on:
+  push:
+    branches:
+      - master
 
+jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -25,13 +28,8 @@ jobs:
         fi
 
     - name: Build
+      id: build
       run: go build -v -o dmmist
-
-    - name: Zip the binary
-      run: |
-        if [ -f dmmist ]; then
-          zip ./dmmlist.zip ./dmmlist
-        fi;
 
     - name: Create Release
       uses: actions/create-release@v1
@@ -50,6 +48,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
-        asset_path: dmmlist.zip
-        asset_name: dmmlist.zip
+        asset_path: dmmlist
+        asset_name: dmmlist
         asset_content_type: application/zip
