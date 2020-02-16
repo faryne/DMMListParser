@@ -29,7 +29,7 @@ jobs:
 
     - name: Zip the binary
       run: |
-        zip dmmlist.zip dmmlist
+        zip ./dmmlist.zip ./dmmlist
 
     - name: Create Release
       uses: actions/create-release@v1
