@@ -29,7 +29,9 @@ jobs:
 
     - name: Zip the binary
       run: |
-        zip ./dmmlist.zip ./dmmlist
+        if [ -f dmmist ]; then
+          zip ./dmmlist.zip ./dmmlist
+        fi;
 
     - name: Create Release
       uses: actions/create-release@v1
