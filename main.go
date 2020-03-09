@@ -163,6 +163,7 @@ func ParsePage (PageUrl string) DmmVideoBody {
 					VideoBody.Duration, _ = strconv.Atoi(strings.TrimSpace(duration[1]))
 					break
 				case "directors":
+					VideoBody.Directors = make([]string, 0)
 					rowValue.Find("a").Each(func(i int, d *goquery.Selection) {
 						h, _ := d.Html()
 						VideoBody.Directors =  append(VideoBody.Directors, strings.TrimSpace(h))
@@ -212,9 +213,9 @@ func ParseActresses (document goquery.Document, url string) []string {
 
 	var actresses = make([]string, 0)
 	if element.Length() == 0 {
-		actresses = document.Find("span#performer > a").Map(func(idx int, s *goquery.Selection) string {
+		document.Find("span#performer > a").Each(func(i int, s *goquery.Selection){
 			h, _ := s.Html()
-			return strings.TrimSpace(h)
+			actresses = append(actresses, strings.TrimSpace(h))
 		})
 	} else {
 		// 在網頁中找看看有沒有這個網址 pattern
