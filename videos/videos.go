@@ -3,12 +3,12 @@ package videos
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"io"
 	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
-	"github.com/PuerkitoBio/goquery"
 )
 
 type DmmVideosList struct {
@@ -106,10 +106,18 @@ func ParsePage (PageUrl string) DmmVideoBody {
 
 	var VideoBody = DmmVideoBody{}
 	// 解出詳細資訊
-	req1, _ := http.Get(PageUrl)
-	defer req1.Body.Close()
+	var resp io.Reader
+	c := http.Client{}
+	req1, _ := http.NewRequest("GET", PageUrl, resp)
+	req1.AddCookie(&http.Cookie{
+		Name:       "age_check_done",
+		Value:      "1",
+	})
+	out, _ := c.Do(req1)
 
-	v, _ := goquery.NewDocumentFromReader(req1.Body)
+	defer out.Body.Close()
+
+	v, _ := goquery.NewDocumentFromReader(out.Body)
 
 	VideoBody.Actresses = ParseActresses(*v, PageUrl)
 	VideoBody.Images = parseImages(*v)
