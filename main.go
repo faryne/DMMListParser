@@ -1,11 +1,13 @@
 package main
 
 import (
+	"./actresses"
+	"./videos"
 	"flag"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
-	"./videos"
-	"./actresses"
 )
 
 type DmmVideosListError struct {
@@ -25,22 +27,34 @@ func main () {
 	}
 
 	// 建立 http 連線以便取得網頁內容
-	req, err := http.Get(url)
+	c := http.Client{}
+	var resp io.Reader
+	req, _ := http.NewRequest("GET", url, resp)
+	req.AddCookie(&http.Cookie{
+		Name:       "age_check_done",
+		Value:      "1",
+	})
+	out, err2 := c.Do(req)
 	// 如果發生錯誤時
-	if err != nil {
-		fmt.Printf(">>> Error: %s\n", err)
+	if err2 != nil {
+		fmt.Printf(">>> Error: %s\n", err2)
+		return
 	}
 	//
 	// 不是 200 時
-	if req.StatusCode != 200 {
-		fmt.Printf(">>> Error: %d\n", req.StatusCode)
+	if out.StatusCode != 200 {
+		fmt.Printf(">>> Error (HTTP): %d\n", out.StatusCode)
+		responseContent, _ := ioutil.ReadAll(out.Body)
+		fmt.Printf(string(responseContent))
+		return
 	}
-	defer req.Body.Close()
+
+	defer out.Body.Close()
 
 	switch mode {
 	case "videos":
-		videos.Parse(req.Body)
+		videos.Parse(out.Body)
 	case "actresses":
-		actresses.Parse(req.Body)
+		actresses.Parse(out.Body)
 	}
 }
